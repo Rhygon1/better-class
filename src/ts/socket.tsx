@@ -17,7 +17,7 @@ export const SocketProvider: React.FC<Props> = ({ children }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
-    const newSocket = io("/"); // Replace with your server address
+    const newSocket = io("ws://"); // Replace with your server address
     setSocket(newSocket);
     return () => {newSocket.close()};
   }, []);
