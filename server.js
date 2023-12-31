@@ -1,17 +1,18 @@
-const express = require('express');
+import express from 'express';
 const app = express();
-const http = require('http');
+import http from 'http';
 const server = http.createServer(app);
-const { customAlphabet } = require('nanoid');
+import { customAlphabet } from 'nanoid';
 const nanoid = customAlphabet('1234567890qwertyuioplakjhgfdszxcvbnm', 6);
-const uuid = require('uuid');
-const cors = require('cors');
-const io = require('socket.io')(server, {
+import { v4 as uuidv4 } from 'uuid';
+import cors from 'cors';
+import { Server } from 'socket.io'
+const io = new Server(server, {
     cors: {
      origin: "*",
      methods: ["GET", "POST"]
     }
-   });
+   })
 const PORT = process.env.PORT || 5000;
 
 app.use(cors())
@@ -55,7 +56,7 @@ class Room {
 
     newQuestion(question, socketid){
         if(question.length < 1 || question.length > 256) return
-        let newID = uuid.v4()
+        let newID = uuidv4()
         let name = this.teacher[socketid]
         if(!name) name = this.students[socketid]
         this.questions[newID] = [question, name, socketid]
