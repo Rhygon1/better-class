@@ -21,7 +21,7 @@ export const Room = () => {
 
   useEffect(() => {
     let fetchExist = async () => {
-      let res: Response = await fetch(`http://192.168.1.207:5000/api/room/check/${id}`)
+      let res: Response = await fetch(`http:///api/room/check/${id}`)
       if (!res.ok) {
         throw new Error('Network response was not ok.');
       }
