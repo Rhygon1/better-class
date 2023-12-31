@@ -70,7 +70,7 @@ export const Home = () => {
                       <Input
                         autoFocus
                         maxLength={32}
-                        placeholder="Username"
+                        placeholder="Room code"
                         className="lg:max-xl:h-12 lg:max-xl:text-lg text-slate-200 w-full m-0"
                         {...field}
                       ></Input>

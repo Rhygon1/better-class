@@ -7,6 +7,12 @@ const nanoid = customAlphabet('1234567890qwertyuioplakjhgfdszxcvbnm', 6);
 import { v4 as uuidv4 } from 'uuid';
 import cors from 'cors';
 import { Server } from 'socket.io'
+import path from 'path'
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 const io = new Server(server, {
     cors: {
      origin: "*",
@@ -16,6 +22,7 @@ const io = new Server(server, {
 const PORT = process.env.PORT || 5000;
 
 app.use(cors())
+app.use(express.static(path.join(__dirname, '/build')))
 
 class Room {
     constructor(){
@@ -177,5 +184,9 @@ app.get('/api/room/create', (req, res) => {
 
     console.log(rooms)
 })
+
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
 
 server.listen(PORT, () => console.log(PORT))
