@@ -35,7 +35,7 @@ export const Home = () => {
 
   function newRoom(){
     let getCodeAndNavigate = async () => {
-      let res = await fetch('http:///api/room/create/')
+      let res = await fetch('/api/room/create/')
       if (!res.ok){
         throw new Error('API not working')
       }
