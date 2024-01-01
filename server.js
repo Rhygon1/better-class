@@ -28,7 +28,8 @@ class Room {
     constructor(){
         this.teacher = {} //socketid: name
         this.students = {}; //[{} socketid: name]
-        this.questions = {} //[[question, socketid of asking]]
+        this.questions = {}
+        this.locked = false
     }
 
     addPerson(newID, name){
@@ -61,12 +62,23 @@ class Room {
         }
     }
 
-    newQuestion(question, socketid){
+    newQuestion(question, anonTeacher, socketid){
         if(question.length < 1 || question.length > 256) return
         let newID = uuidv4()
         let name = this.teacher[socketid]
         if(!name) name = this.students[socketid]
-        this.questions[newID] = [question, name, socketid]
+        this.questions[newID] = {
+            question: question,
+            answers: [],
+            socketid: socketid
+        }
+
+        if(!anonTeacher){
+            this.questions[newID] = {
+                ...this.questions[newID],
+                name
+            }
+        }
 
         for(let id in this.teacher){
             io.to(id).emit('syncQuestions', this.questions)
@@ -74,7 +86,10 @@ class Room {
         for(let id in this.students){
             let editedQuestions = { ...this.questions }
             for(let q in editedQuestions) {
-                editedQuestions[q] = [this.questions[q][0]]
+                editedQuestions[q] = {
+                    question: this.questions[q].question,
+                    answers: this.questions[q].answers
+                }
             }
             io.to(id).emit('syncQuestions', editedQuestions)
         }
@@ -91,7 +106,10 @@ class Room {
         for(let id in this.students){
             let editedQuestions = { ...this.questions }
             for(let q in editedQuestions) {
-                editedQuestions[q] = [this.questions[q][0]]
+                editedQuestions[q] = {
+                    question: this.questions[q].question,
+                    answers: this.questions[q].answers
+                }
             }
             io.to(id).emit('syncQuestions', editedQuestions)
         }
@@ -107,12 +125,19 @@ io.on('connection', socket => {
         if(!rooms[id]){
             return
         }
+        if(rooms[id].locked){
+            socket.emit('homePage')
+            return
+        }
         if(Object.keys(rooms[id].teacher).length == 0 || Object.keys(rooms[id].teacher).includes(socket.id)){
             socket.emit('syncValues', rooms[id].teacher, rooms[id].students, rooms[id].questions)
         } else {
             let editedQuestions = { ...rooms[id].questions }
             for(let q in editedQuestions) {
-                editedQuestions[q] = [rooms[id].questions[q][0]]
+                editedQuestions[q] = {
+                    question: rooms[id].questions[q].question,
+                    answers: rooms[id].questions[q].answers
+                }
             }
             console.log(editedQuestions)
             socket.emit('syncValues', rooms[id].teacher, rooms[id].students, editedQuestions)
@@ -127,11 +152,11 @@ io.on('connection', socket => {
         io.to(socketid).emit('homePage')
     })
 
-    socket.on('newQuestion', (question, roomid) => {
+    socket.on('newQuestion', (question, anonTeacher, roomid) => {
         if(!rooms[roomid]){
             return
         }
-        rooms[roomid].newQuestion(question, socket.id)
+        rooms[roomid].newQuestion(question, anonTeacher, socket.id)
     })
 
     socket.on('removeQuestion', (quesID, roomid) => {
@@ -139,6 +164,13 @@ io.on('connection', socket => {
             return
         }
         rooms[roomid].remQues(quesID)
+    })
+
+    socket.on('setLock', (locked, roomid) => {
+        if(!rooms[roomid] || Object.keys(rooms[roomid].teacher)[0] != socket.id){
+            return
+        }
+        rooms[roomid].locked = locked
     })
 
     socket.on('disconnect', () => {
