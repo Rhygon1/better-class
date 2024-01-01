@@ -8,6 +8,11 @@ body {
   height: 100vh;
 }
  
+@keyframes fall {
+  from { top: 0; }
+  to { top: 100%; }
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

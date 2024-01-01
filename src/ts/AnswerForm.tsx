@@ -1,8 +1,3 @@
-import { useState, useContext } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { Button } from "../components/ui/button";
 import {
   Form,
   FormControl,
@@ -11,39 +6,36 @@ import {
   FormLabel,
   FormMessage,
 } from "../components/ui/form";
-import { ScrollArea } from "../components/ui/scrollarea";
-import { QuestionCard } from "./QuestionCard";
-import { SocketContext } from "./socket";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { Button } from "../components/ui/button";
 import TextareaAutosize from "react-textarea-autosize";
-import { questionsInter } from "./Main";
 import { Checkbox } from "../components/ui/checkbox";
-import { Grapes } from "./Grapes";
+import { response } from "./Main";
+import { useContext } from "react";
+import { SocketContext } from "./socket";
 
 const formSchema = z.object({
-  question: z
+  answer: z
     .string()
     .trim()
     .min(1, {
-      message: "Question must be at least 1 character.",
+      message: "Answer must be at least 1 character.",
     })
     .max(256, {
-      message: "Question can not be more than 256 characters.",
+      message: "Answer can not be more than 256 characters.",
     }),
 
   teacherAnon: z.boolean(),
 });
 
 type props = {
-  questions: questionsInter;
-  isTeacher: boolean;
-  removeQuestion: Function;
-  removeUser: Function;
-  removeAnswer: Function;
-  code: string;
-};
+    roomCode: string;
+    questionCode: string;
+}
 
-export const Questions = (props: props) => {
-  const [grapes, setGrapes] = useState(false)
+export const AnswerForm = (props: props) => {
   const context = useContext(SocketContext);
   if (!context) throw new Error();
   const { socket } = context;
@@ -51,61 +43,33 @@ export const Questions = (props: props) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      question: "",
+      answer: "",
       teacherAnon: false,
     },
   });
 
   function onSubmit(data: z.infer<typeof formSchema>) {
-    form.setValue('question', '');
-    if(data.question === 'GRAPES :D'){
-      setGrapes(true)
-      setTimeout(() => setGrapes(false), 6000)
-    } else {
-      socket?.emit("newQuestion", data.question, data.teacherAnon, props.code);
-    }
+    form.setValue("answer", "");
+    socket?.emit("addAnswer", data.answer, data.teacherAnon, props.roomCode, props.questionCode);
   }
 
   return (
-    <div className="grow flex flex-col overflow-hidden">
-      <ScrollArea className="grow bg-defBG text-slate-200 mb-0 p-4 flex flex-wrap justify-start w-full">
-        {Object.keys(props.questions)
-          .reverse()
-          .map((k) => {
-            return (
-              <QuestionCard
-                key={k}
-                removeQuestion={props.removeQuestion}
-                removeAnswer={props.removeAnswer}
-                removeUser={props.removeUser}
-                isTeacher={props.isTeacher}
-                cardKey={k}
-                questions={props.questions}
-                roomCode={props.code}
-              />
-            );
-          })}
-      </ScrollArea>
-
-      <Form {...form}>
+    <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="m-3 mb-4 mt-1 md:mt-4 space-y-6 flex items-center"
+          className="m-0 mb-4 mt-6 space-y-3 flex items-center"
         >
-          <div className="w-full flex flex-col gap-2">
+          <div className="w-full flex flex-col -gap-4">
             <FormField
               control={form.control}
-              name="question"
+              name="answer"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-slate-200">
-                    Add a question {`(It will be anonymous for all students)`}
-                  </FormLabel>
                   <FormControl>
                     <div className="grow flex my-2">
                       <TextareaAutosize
-                        placeholder="Question"
-                        className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 text-slate-200 resize-none break-all border-slate-700 focus:border-slate-200"
+                        placeholder="Answer the question! Your response will be anonymous to all students..."
+                        className="mx-0 px-0 flex w-full rounded-md bg-transparent py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 text-slate-200 resize-none break-all border-none"
                         onKeyDown={(e) => {
                           if (
                             e.key === "Enter" &&
@@ -156,7 +120,5 @@ export const Questions = (props: props) => {
           </div>
         </form>
       </Form>
-      {grapes && <Grapes />}
-    </div>
   );
 };

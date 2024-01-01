@@ -15,19 +15,28 @@ import {
 } from "../components/ui/dialog";
 import { Button } from "../components/ui/button";
 import { SocketContext } from "./socket";
+import { useNavigate } from "react-router-dom";
+import { UserCard } from "./userCard";
 
 type propsType = {
   code: string;
+  userID: string;
 };
 
 interface userSockets {
   [key: string]: string;
 }
 
+export interface response {
+  content: string;
+  userID?: string;
+  socketid?: string;
+}
+
 interface questionInter {
-  question: string;
-  answers: string[];
-  name?: string;
+  content: string;
+  answers: {[key:string]: response};
+  userID?: string;
   socketid?: string;
 }
 
@@ -36,12 +45,13 @@ export interface questionsInter {
 }
 
 export const Main = (props: propsType) => {
+  const navigate = useNavigate()
   const [isTeacher, setIsTeacher] = useState(false);
   const [teacher, setTeacher] = useState<userSockets>({});
   const [students, setStudents] = useState<userSockets>({});
   const [questions, setQuestions] = useState<questionsInter>({});
   const [sidebar, setSidebar] = useState(false);
-  const [tts, setTTS] = useState(true);
+  const [tts, setTTS] = useState(false);
   const context = useContext(SocketContext);
   if (!context) throw new Error();
   const { socket } = context;
@@ -52,6 +62,7 @@ export const Main = (props: propsType) => {
       newStudents: userSockets,
       newQuestions: questionsInter
     ) {
+      console.log(newTeacher, newStudents, newQuestions)
       setTeacher(newTeacher);
       setStudents(newStudents);
       setQuestions(newQuestions);
@@ -71,16 +82,37 @@ export const Main = (props: propsType) => {
       setQuestions(newQuestions);
     }
 
+    function homePageHandler(){
+      navigate('/')
+    }
+
+    function ttsHandler(ques: string){
+      if(!tts) return
+      const synth = window.speechSynthesis;
+      const voices = synth.getVoices();
+      const utterance = new SpeechSynthesisUtterance(ques);
+      utterance.voice = voices[4]
+      synth.speak(utterance);      
+    }
+
     socket?.on("syncValues", syncValuesHandler);
     socket?.on("syncPeople", syncPeopleHandler);
     socket?.on("syncQuestions", syncQuestionsHandler);
+    socket?.on('homePage', homePageHandler)
+    socket?.on('tts', ttsHandler);
 
     return () => {
       socket?.off("syncValues", syncValuesHandler);
       socket?.off("syncPeople", syncPeopleHandler);
       socket?.off("syncQuestions", syncQuestionsHandler);
+      socket?.off('homePage', homePageHandler)
+      socket?.off('tts', ttsHandler);
     };
   }, [socket, teacher, students, questions]);
+
+  useEffect(() => {
+    socket?.emit('changeUserID', props.userID, props.code)
+  }, [socket])
 
   function removeQuestion(id: string) {
     socket?.emit("removeQuestion", id, props.code);
@@ -88,6 +120,10 @@ export const Main = (props: propsType) => {
 
   function removeUser(id: string) {
     socket?.emit("removeUser", id, props.code);
+  }
+
+  function removeAnswer(quesID: string, ansID: string){
+    socket?.emit('removeAnswer', quesID, ansID, props.code)
   }
 
   return (
@@ -105,7 +141,9 @@ export const Main = (props: propsType) => {
             {Object.keys(teacher).map((KeyT) => {
               return (
                 <div key={KeyT}>
-                  <div className="text-slate-200 text-md">{teacher[KeyT]}</div>
+                  <div className="text-slate-200 text-md">
+                    <UserCard userId={teacher[KeyT]}/>
+                  </div>
                   <Separator className="my-2 mb-6"></Separator>
                 </div>
               );
@@ -117,9 +155,9 @@ export const Main = (props: propsType) => {
               return (
                 <div key={KeyT}>
                   <div className="flex justify-between">
-                    <p className="text-slate-200 text-md flex justify-center items-center">
-                      {students[KeyT]}
-                    </p>
+                    <div className="text-slate-200 text-md flex justify-center items-center">
+                      <UserCard userId={students[KeyT]}/>
+                    </div>
                     {isTeacher ? (
                       <Dialog>
                         <DialogTrigger asChild>
@@ -180,6 +218,7 @@ export const Main = (props: propsType) => {
           questions={questions}
           removeQuestion={removeQuestion}
           removeUser={removeUser}
+          removeAnswer={removeAnswer}
           isTeacher={isTeacher}
           code={props.code}
         />

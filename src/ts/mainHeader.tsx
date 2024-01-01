@@ -11,7 +11,7 @@ import { SocketContext } from "./socket";
 type props = {
   code: String,
   tts: boolean,
-  settts: Function,
+  settts: (checked: boolean) => void,
   setSidebar: Function,
   isTeacher: boolean;
 };
@@ -27,10 +27,6 @@ export const MainHeader = (props: props) => {
         navigate('/')
     }
 
-    function changeTTS(): void {
-        props.settts((curr: Boolean) => !curr)
-    }
-
     function changeSidebar(): void {
         props.setSidebar((curr: Boolean) => !curr)
     }
@@ -40,7 +36,7 @@ export const MainHeader = (props: props) => {
     }, [locked, socket])
 
     return (
-    <div className="h-1/5 bg-red text-slate-200 flex flex-col justify-start">
+    <div className="mb-1 h-1/5 bg-red text-slate-200 flex flex-col justify-start">
     <div className="flex justify-between">
       <div className="h-full">
         <Button variant="ghost" size="icon" onClick={changeSidebar} className="m-3 outline outline-white outline-1 md:hidden">
@@ -51,7 +47,7 @@ export const MainHeader = (props: props) => {
       <div className="h-full flex gap-2">
         {props.isTeacher && <div className="flex items-center space-x-2 mx-1">
             <Label htmlFor="tts">TTS</Label>
-            <Switch id="tts" checked={props.tts} onCheckedChange={changeTTS}/>
+            <Switch id="tts" checked={props.tts} onCheckedChange={props.settts}/>
         </div>}
         {props.isTeacher && <div className="flex items-center space-x-2 mx-1">
             <Label htmlFor="lock">
