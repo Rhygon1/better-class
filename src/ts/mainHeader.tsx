@@ -61,7 +61,7 @@ export const MainHeader = (props: props) => {
       </div>
     </div >
     <div className="flex justify-center">
-      <h1 className="text-[2.7rem] bold">{props.code}</h1>
+      <h1 className="text-[2rem] bold">{props.code}</h1>
     </div>
     </div>
   );

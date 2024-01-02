@@ -33,17 +33,17 @@ export const UserCard = (props: props) => {
   }, []);
 
   return (
-    <div className="flex gap-3">
+    <div className="flex items-center gap-3">
       
-        <Avatar>
-          <AvatarImage src={data?.pfpUrl} />
+        <Avatar className="h-8 w-8 md:h-10 md:w-10">
+          <AvatarImage src={data?.pfpUrl}/>
           <AvatarFallback className='bg-defBG'>
             <User />
           </AvatarFallback>
         </Avatar>
       
 
-      <p className="flex items-center">{data?.username ? data?.username : "Anonymous"}</p>
+      <p className="flex items-center text-md md:text-lg text-slate-200">{data?.username ? data?.username : "Anonymous"}</p>
     </div>
   );
 };

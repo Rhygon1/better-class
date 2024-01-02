@@ -66,10 +66,10 @@ export const AnswerForm = (props: props) => {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <div className="grow flex my-2">
+                    <div className="grow flex my-0">
                       <TextareaAutosize
                         placeholder="Answer the question! Your response will be anonymous to all students..."
-                        className="mx-0 px-0 flex w-full rounded-md bg-transparent py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 text-slate-200 resize-none break-all border-none"
+                        className="text-base mx-0 px-0 flex w-full rounded-md bg-transparent py-1 shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 text-slate-200 resize-none break-all border-none"
                         onKeyDown={(e) => {
                           if (
                             e.key === "Enter" &&
@@ -107,7 +107,7 @@ export const AnswerForm = (props: props) => {
                     ></Checkbox>
                   </FormControl>
                   <FormLabel className="text-slate-200">
-                    Make anonymous for teacher
+                    Make answer anonymous for teacher
                   </FormLabel>
                   <FormMessage />
                 </FormItem>

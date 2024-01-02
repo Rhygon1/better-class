@@ -16,9 +16,18 @@ module.exports = {
         "2xl": "1400px",
       },
     },
+    fontSize: {
+      'xs': '.625rem', // Extra small
+      'sm': '.7rem', // Small
+      'md': '.775rem',
+      'base': '.825rem', // Base size
+      'lg': '.9rem', // Large
+      'xl': '1.125rem', // Extra large
+      '2xl': '1.25rem', // 2X large
+      '3xl': '1.5rem', // 3X large
+    },
     extend: {
       fontFamily: {
-        sans: ['var(--font-geist-sans)'],
         mono: ['var(--font-geist-mono)'],
       },
       colors: {

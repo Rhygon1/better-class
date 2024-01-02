@@ -3,7 +3,7 @@ import {
   CardTitle,
 } from "../components/ui/card";
 import { Button } from "../components/ui/button";
-import { X } from "lucide-react";
+import { Ban, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -35,23 +35,23 @@ type props = {
 
 export const BaseCardHeader = (props: props) => {
   return (
-    <CardHeader className={`pb-4 pt-1 pr-3 w-full flex flex-row justify-between ${props.headerClassNames}`}>
-        <CardTitle className={`break-all text-md pt-5 text-lg ${props.titleClassNames}`}>
+    <CardHeader className={`pb-1 pt-1 pr-3 w-full flex flex-row justify-between ${props.headerClassNames}`}>
+        <CardTitle className={`break-all text-md pt-3 ${props.titleClassNames}`}>
           {props.questions[props.cardKey].userID != null ? (
             <UserCard userId={props.questions[props.cardKey].userID} />
           ) : (
             <UserCard userId="" />
           )}
         </CardTitle>
-        <div className="flex gap-2">
+        <div className="flex gap-1 items-center">
           {props.isTeacher ? (
             <Dialog>
               <DialogTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="border border-slate-600 rounded-lg w-28 h-8"
+                  size="icon"
                 >
-                  Remove student
+                  <Ban className="w-4 h-4"/>
                 </Button>
               </DialogTrigger>
               <DialogContent className="bg-defBG z-[100]">
