@@ -1,13 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useLocation } from "react-router-dom";
 import { useNavigate } from 'react-router-dom';
 import { Main } from './Main';
 import { SignIn, useUser } from "@clerk/clerk-react";
 import { SocketProvider } from './socket';
-
-interface apiRes {
-  exists: boolean;
-}
+import { TrpcContext } from "./clientContext";
 
 export const Room = () => {
   const navigate = useNavigate()
@@ -16,14 +13,15 @@ export const Room = () => {
   const [id, _] = useState(params.get("code"));
   const { isSignedIn, user, isLoaded } = useUser()
   const userID = (user?.id) ? (user?.id) : null
+  const client = useContext(TrpcContext)
 
   useEffect(() => {
     let fetchExist = async () => {
-      let res: Response = await fetch(`/api/room/check/${id}`)
-      if (!res.ok) {
-        throw new Error('Network response was not ok.');
+      if(!id || !client){
+        navigate('/')
+        return
       }
-      let result: apiRes = await res.json();
+      let result = await client.rooms.check.query(id)
       if(!result.exists){
         navigate('/')
       }

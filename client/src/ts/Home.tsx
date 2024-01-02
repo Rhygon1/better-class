@@ -17,6 +17,8 @@ import {
   SignOutButton,
 } from "@clerk/clerk-react";
 import { LogIn, LogOut } from "lucide-react";
+import { TrpcContext } from "./clientContext";
+import { useContext } from "react";
 
 const formSchema = z.object({
   code: z
@@ -31,7 +33,8 @@ const formSchema = z.object({
 
 export const Home = () => {
   const navigate = useNavigate();
-  const { isSignedIn, isLoaded } = useUser();
+  const { isSignedIn } = useUser();
+  const client = useContext(TrpcContext)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -42,11 +45,10 @@ export const Home = () => {
 
   function newRoom() {
     let getCodeAndNavigate = async () => {
-      let res = await fetch("/api/room/create/");
-      if (!res.ok) {
-        throw new Error("API not working");
+      if(!client){
+        return
       }
-      let result = await res.json();
+      let result = await client.rooms.create.mutate()
       navigate(`/room?code=${result.code}`);
     };
 
